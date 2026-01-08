@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AppLayout from "./layout/AppLayout";
 import RequireAuth from "./auth/RequireAuth";
 import { ScrollToTop } from "./components/common/ScrollToTop";
@@ -28,12 +28,11 @@ export default function App() {
         {/* Public callback route */}
         <Route path="/auth/callback" element={<AuthCallback />} />
 
-        {/* ✅ Public Landing */}
+          {/* Public */}
         <Route path="/" element={<Landing />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/refund-policy" element={<Refund />} />
         <Route path="/shipping-policy" element={<Shipping />} />
-
         {/* Auth pages */}
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
@@ -48,10 +47,13 @@ export default function App() {
             </RequireAuth>
           }
         >
-          <Route path="/app" element={<Home />} />
-          <Route path="/app/profile" element={<Profile />} />
-          <Route path="/app/estimate" element={<Estimate />} />
-          <Route path="/app/history" element={<History />} />
+          <Route index element={<Home />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="estimate" element={<Estimate />} />
+          <Route path="history" element={<History />} />
+
+
+          
         </Route>
 
         

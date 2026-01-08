@@ -25,11 +25,11 @@ export default function SignUpForm() {
   // If already logged in, go dashboard
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data?.session) navigate("/", { replace: true });
+      if (data?.session) navigate("/app", { replace: true });
     });
 
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (session) navigate("/", { replace: true });
+      if (session) navigate("/app", { replace: true });
     });
 
     return () => sub?.subscription?.unsubscribe();
@@ -92,7 +92,7 @@ export default function SignUpForm() {
       }
 
       // If confirmations OFF, session exists immediately
-      navigate("/", { replace: true });
+      navigate("/app", { replace: true });
     } finally {
       setLoadingEmail(false);
     }

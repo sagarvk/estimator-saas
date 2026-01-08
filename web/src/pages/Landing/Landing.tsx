@@ -1,4 +1,4 @@
-import { Link, Navigate } from "react-router";
+import { Link, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase"; // ✅ adjust path if your supabase client file differs
 import { Helmet } from "react-helmet-async";
