@@ -17,12 +17,27 @@ import { makeDashboardRouter } from "./routes/dashboard.js";
 dotenv.config();
 
 const app = express();
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://estimatorpro-saas.vercel.app",
+  // add custom domain later if any: "https://estimatorpro.co.in"
+];
+
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: (origin, cb) => {
+      // allow non-browser calls (like curl/postman)
+      if (!origin) return cb(null, true);
+      if (allowedOrigins.includes(origin)) return cb(null, true);
+      return cb(new Error(`CORS blocked for origin: ${origin}`));
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+app.options("*", cors());
 app.use(express.json({ limit: "5mb" }));
 
 const db = makeSupabaseServiceClient({
