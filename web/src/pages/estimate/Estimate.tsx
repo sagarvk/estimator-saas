@@ -71,11 +71,27 @@ export default function Estimate() {
   // preview popup
   const [previewOpen, setPreviewOpen] = useState(false);
   const [preview, setPreview] = useState(null);
+  const [quota, setQuota] = useState(null);
 
   const selectedQuality = useMemo(
     () => qualities.find((q) => String(q.id) === String(qualityId)),
     [qualities, qualityId]
   );
+
+  //Free Quota
+  const fetchQuota = async () => {
+  try {
+    const q = await api("/api/payments/quota");
+      setQuota(q);
+    } catch {
+     setQuota(null);
+    }
+  };
+  useEffect(() => {
+    fetchQuota();
+  }, []);
+
+
 
   // ✅ reset everything after successful download
   const resetForm = () => {
@@ -205,6 +221,14 @@ export default function Estimate() {
         method: "POST",
         body: JSON.stringify({ estimate_payload }),
       });
+      // ✅ FREE demo case: backend already generated PDF
+      if (created.free) {
+        window.location.href = created.download_url;
+        resetForm();
+        setPaying(false);
+      return;
+      }
+
 
       const orderId = created.order.id;
       const rzKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
@@ -251,6 +275,40 @@ export default function Estimate() {
       setPaying(false);
     }
   };
+
+  const onFreeDownload = async () => {
+  try {
+    setErr("");
+    setPaying(true);
+
+    const estimate_payload = {
+      client_name: toCaps(clientName.trim()),
+      project_address: toCaps(projectAddress.trim()),
+      plot_length_ft: plotL ? Number(plotL) : null,
+      plot_width_ft: plotW ? Number(plotW) : null,
+      floors: floors ? Number(floors) : null,
+      builtup_area_sqft: Number(builtup),
+      project_type_code: projectTypeCode,
+      quality_id: Number(qualityId),
+    };
+
+    const resp = await api("/api/payments/free-download", {
+      method: "POST",
+      body: JSON.stringify({ estimate_payload }),
+    });
+
+    window.location.href = resp.download_url;
+
+    // refresh quota + reset
+    await fetchQuota();
+    resetForm();
+  } catch (e) {
+    setErr(e.message || "Free download failed");
+  } finally {
+    setPaying(false);
+  }
+};
+
 
   return (
     <div className="rounded-sm border border-stroke bg-white p-5 shadow-default dark:border-strokedark dark:bg-boxdark">
@@ -384,14 +442,24 @@ export default function Estimate() {
             </div>
 
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-end">
-              <Button variant="outline" onClick={() => setPreviewOpen(false)} className="w-full sm:w-auto">
-                Edit
-              </Button>
+            <Button variant="outline" onClick={() => setPreviewOpen(false)} className="w-full sm:w-auto">
+              Edit
+            </Button>
 
+            {quota?.free_left > 0 ? (
+              <Button
+                onClick={onFreeDownload}
+                disabled={paying}
+                className="w-full sm:w-auto"
+              >
+                {paying ? "Preparing..." : `Download Free (${quota.free_left} left)`}
+              </Button>
+            ) : (
               <Button onClick={onPayAndDownload} disabled={paying} className="w-full sm:w-auto">
                 {paying ? "Opening Payment..." : `Pay ₹${price} & Download`}
               </Button>
-            </div>
+            )}
+          </div>
 
             <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
               After download, the form will reset automatically.
