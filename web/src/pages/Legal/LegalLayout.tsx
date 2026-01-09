@@ -76,6 +76,9 @@ export default function LegalLayout({ title, updatedAt, children }) {
               <Link className="hover:text-black dark:hover:text-white" to="/shipping">
                 Shipping & Delivery Policy
               </Link>
+              <Link className="hover:text-black dark:hover:text-white" to="/contact">
+                Contact Us
+              </Link>
             </div>
           </div>
         </div>

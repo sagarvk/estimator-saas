@@ -166,9 +166,14 @@ export default function Landing() {
                           </h1>
 
                           <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-                              EstimatorPro helps Civil Engineers & Architects generate accurate
-                              estimate PDFs with breakup, charges, GST and rule-based items
-                              (like water tank capacity) automatically.
+                              EstimatorPro is designed for Civil Engineers and Architects who need clear, professional, and reliable estimate documents—without wasting time on repetitive calculations or manual formatting. 
+                          </p>
+                          <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                            Whether you’re preparing estimates for bank loan approvals, project submissions, or client documentation, EstimatorPro helps you generate clean, structured PDF estimates that look authoritative and are ready to share instantly.
+                          </p>
+                         
+                          <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                            From sign-up to submission in minutes—complete your profile, add your letterhead, signature, and seal, and generate professional estimates instantly.
                           </p>
 
                           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
@@ -286,12 +291,12 @@ export default function Landing() {
                   <Container>
                       <SectionTitle
                           eyebrow="Pricing"
-                          title="Pay per estimate"
+                          title="Pay Per Estimate"
                           desc="Simple pricing that matches your current Razorpay setup." />
 
                       <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-stroke bg-white p-6 text-center dark:border-strokedark dark:bg-boxdark">
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Per estimate</div>
-                          <div className="mt-2 text-4xl font-semibold text-black dark:text-white">₹399</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Per Estimate</div>
+                          <div className="mt-2 text-4xl font-semibold text-black dark:text-white">₹499</div>
                           <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                               * Final price can be configured from settings.
                           </div>
@@ -326,11 +331,17 @@ export default function Landing() {
                               <Link className="hover:text-black dark:hover:text-white" to="/terms">
                                   Terms & Conditions
                               </Link>
-                              <Link className="hover:text-black dark:hover:text-white" to="/refund-policy">
+                              <Link className="hover:text-black dark:hover:text-white" to="/privacy">
+                                  Privacy Policy
+                              </Link>
+                              <Link className="hover:text-black dark:hover:text-white" to="/refund">
                                   Cancellation & Refund Policy
                               </Link>
-                              <Link className="hover:text-black dark:hover:text-white" to="/shipping-policy">
+                              <Link className="hover:text-black dark:hover:text-white" to="/shipping">
                                   Shipping & Delivery Policy
+                              </Link>
+                              <Link className="hover:text-black dark:hover:text-white" to="/contact">
+                                  Contact Us
                               </Link>
                               <span className="hidden sm:inline">•</span>
                               <Link className="hover:text-black dark:hover:text-white" to="/signin">

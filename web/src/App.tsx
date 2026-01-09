@@ -18,8 +18,10 @@ import Estimate from "./pages/estimate/Estimate";
 import History from "./pages/history/History";
 import Landing from "./pages/Landing/Landing";
 import Terms from "./pages/Legal/Terms";
-import Refund from "./pages/Legal/Refund";
-import Shipping from "./pages/Legal/Shipping";
+import PrivacyPolicy from "./pages/Legal/PrivacyPolicy";
+import ShippingPolicy from "./pages/Legal/ShippingPolicy";
+import RefundPolicy from "./pages/Legal/RefundPolicy";
+import ContactUs from "./pages/Legal/ContactUs";
 export default function App() {
   return (
     <Router>
@@ -31,8 +33,11 @@ export default function App() {
           {/* Public */}
         <Route path="/" element={<Landing />} />
         <Route path="/terms" element={<Terms />} />
-        <Route path="/refund-policy" element={<Refund />} />
-        <Route path="/shipping-policy" element={<Shipping />} />
+        <Route path="/refund" element={<RefundPolicy />} />
+        <Route path="/shipping" element={<ShippingPolicy />} />
+        <Route path="/contact" element={<ContactUs />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+
         {/* Auth pages */}
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />

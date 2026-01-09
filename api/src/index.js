@@ -39,6 +39,7 @@ app.use(
 );
 app.options("*", cors());
 app.use(express.json({ limit: "5mb" }));
+app.set("trust proxy", 1);
 
 const db = makeSupabaseServiceClient({
   url: process.env.SUPABASE_URL,
