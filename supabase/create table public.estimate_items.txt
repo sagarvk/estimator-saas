@@ -1,0 +1,14 @@
+create table public.estimate_items (
+  id uuid not null default extensions.uuid_generate_v4 (),
+  estimate_id uuid not null,
+  sr_no integer not null,
+  description text not null,
+  qty numeric(14, 2) null,
+  unit text null,
+  rate numeric(14, 2) null,
+  amount numeric(14, 2) not null,
+  is_addon boolean not null default false,
+  sort_order integer not null default 100,
+  constraint estimate_items_pkey primary key (id),
+  constraint estimate_items_estimate_id_fkey foreign KEY (estimate_id) references estimates (id) on delete CASCADE
+) TABLESPACE pg_default;

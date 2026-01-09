@@ -19,7 +19,7 @@ function Logo() {
       <div className="leading-tight">
         <div className="text-base font-semibold text-black dark:text-white">EstimatorPro</div>
         <div className="text-[11px] text-gray-500 dark:text-gray-400">
-          Estimates in minutes
+          Estimates in Minutes
         </div>
       </div>
     </div>
@@ -178,7 +178,7 @@ export default function Landing() {
                           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
                               <Link
                                   to="/signup"
-                                  className="inline-flex items-center justify-center rounded-lg border border-stroke bg-white px-5 py-3 text-sm font-medium text-gray-800 hover:bg-gray-50 dark:border-strokedark dark:bg-boxdark dark:text-gray-200 dark:hover:bg-white/5"
+                                  className="rounded-lg bg-brand-600 px-6 py-3 text-sm font-medium text-white hover:bg-brand-700"
                               >
                                   Get started free
                               </Link>
@@ -192,13 +192,13 @@ export default function Landing() {
 
                           <div className="mt-6 flex flex-wrap justify-center gap-3 text-xs text-gray-500 dark:text-gray-400">
                               <span className="rounded-full border border-stroke bg-white px-3 py-1 dark:border-strokedark dark:bg-boxdark">
-                                  ✅ GST breakup
+                                  ✅ Fast & Accurate
                               </span>
                               <span className="rounded-full border border-stroke bg-white px-3 py-1 dark:border-strokedark dark:bg-boxdark">
-                                  ✅ Project types & qualities
+                                  ✅ Latest SSR
                               </span>
                               <span className="rounded-full border border-stroke bg-white px-3 py-1 dark:border-strokedark dark:bg-boxdark">
-                                  ✅ Download PDF after payment
+                                  ✅ Letterhead, Sign & Seal Included PDF
                               </span>
                           </div>
                       </div>
@@ -287,36 +287,61 @@ export default function Landing() {
 
               {/* Pricing */}
               <div id="pricing" className="py-12">
-                  <Container>
-                      <SectionTitle
-                          eyebrow="Pricing"
-                          title="Pay Per Estimate"
-                          desc="Simple pricing that matches your current Razorpay setup." />
+  <Container>
+    <SectionTitle
+      eyebrow="Pricing"
+      title="Simple, Transparent Pricing"
+      desc="Start free. Pay only when you need more estimates."
+    />
 
-                      <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-stroke bg-white p-6 text-center dark:border-strokedark dark:bg-boxdark">
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Per Estimate</div>
-                          <div className="mt-2 text-4xl font-semibold text-black dark:text-white">₹499</div>
-                          <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                              * Final price can be configured from settings.
-                          </div>
+    <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-stroke bg-white p-6 text-center dark:border-strokedark dark:bg-boxdark">
+      
+      {/* FREE BADGE */}
+      <div className="inline-flex items-center gap-2 rounded-full bg-green-50 px-4 py-1 text-sm font-medium text-green-700 dark:bg-green-900/20 dark:text-green-400">
+        🎉 First 2 Estimates Free
+      </div>
 
-                          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
-                              <Link
-                                  to="/signup"
-                                  className="rounded-lg border border-stroke bg-white px-5 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-strokedark dark:bg-boxdark dark:text-gray-200 dark:hover:bg-white/5"
-                              >
-                                  Create account
-                              </Link>
-                              <Link
-                                  to="/signin"
-                                  className="rounded-lg border border-stroke bg-white px-5 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-strokedark dark:bg-boxdark dark:text-gray-200 dark:hover:bg-white/5"
-                              >
-                                  Sign in
-                              </Link>
-                          </div>
-                      </div>
-                  </Container>
-              </div>
+      {/* PRICE */}
+      <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+        After free quota
+      </div>
+
+      <div className="mt-2 text-4xl font-semibold text-black dark:text-white">
+        ₹499 <span className="text-base font-medium text-gray-500">/ estimate</span>
+      </div>
+
+      <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+        * {/* Price configurable from admin settings. GST extra as applicable. */}
+      </div>
+
+      {/* FEATURES */}
+      <ul className="mt-6 space-y-2 text-sm text-gray-600 dark:text-gray-300">
+        <li>✅ Industry Standard Estimate</li>
+        <li>✅ Generate Estimate in Just Few Clicks</li>
+        <li>✅ Letterhead & Sign Included PDF</li>
+        <li>✅ Instant Download</li>
+      </ul>
+
+      {/* CTA */}
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+        <Link
+          to="/signup"
+          className="rounded-lg bg-brand-600 px-6 py-3 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Get 2 Free Estimates
+        </Link>
+
+        <Link
+          to="/signin"
+          className="rounded-lg border border-stroke bg-white px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-strokedark dark:bg-boxdark dark:text-gray-200 dark:hover:bg-white/5"
+        >
+          Sign in
+        </Link>
+      </div>
+    </div>
+  </Container>
+</div>
+
 
               {/* Footer */}
               <div className="border-t border-stroke py-8 dark:border-strokedark">

@@ -1,0 +1,135 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
+CREATE TABLE public.app_settings (
+  key text NOT NULL,
+  value_json jsonb NOT NULL,
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT app_settings_pkey PRIMARY KEY (key)
+);
+CREATE TABLE public.descriptions (
+  id bigint NOT NULL DEFAULT nextval('descriptions_id_seq'::regclass),
+  project_type_code text NOT NULL,
+  name text NOT NULL,
+  unit text,
+  rate numeric NOT NULL,
+  calc_enum text NOT NULL CHECK (calc_enum = ANY (ARRAY['PERCENT'::text, 'FIXED_QTY'::text, 'LUMPSUM'::text])),
+  percent numeric DEFAULT 0,
+  fixed_qty numeric DEFAULT 0,
+  qty_rule_json jsonb,
+  sort_order integer DEFAULT 100,
+  CONSTRAINT descriptions_pkey PRIMARY KEY (id),
+  CONSTRAINT descriptions_project_type_code_fkey FOREIGN KEY (project_type_code) REFERENCES public.project_types(code)
+);
+CREATE TABLE public.engineer_counters (
+  engineer_id uuid NOT NULL,
+  next_ref_no integer NOT NULL DEFAULT 1,
+  CONSTRAINT engineer_counters_pkey PRIMARY KEY (engineer_id),
+  CONSTRAINT engineer_counters_engineer_id_fkey FOREIGN KEY (engineer_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.estimate_addons (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  ptype_id uuid,
+  key text NOT NULL,
+  label text NOT NULL,
+  percent numeric NOT NULL,
+  sort_order integer NOT NULL DEFAULT 900,
+  active boolean NOT NULL DEFAULT true,
+  CONSTRAINT estimate_addons_pkey PRIMARY KEY (id),
+  CONSTRAINT estimate_addons_ptype_id_fkey FOREIGN KEY (ptype_id) REFERENCES public.project_types(id)
+);
+CREATE TABLE public.estimates (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  engineer_id uuid NOT NULL,
+  ref_no text,
+  ref_seq integer,
+  estimate_date date NOT NULL DEFAULT CURRENT_DATE,
+  client_name text NOT NULL,
+  project_address text NOT NULL,
+  plot_length_ft numeric,
+  plot_width_ft numeric,
+  floors integer,
+  builtup_area_sqft numeric NOT NULL,
+  ptype_id uuid NOT NULL,
+  rate_per_sqft numeric NOT NULL,
+  grand_total_incl_gst numeric NOT NULL,
+  sub_total_excl_gst numeric NOT NULL,
+  gst_amount numeric NOT NULL,
+  status text NOT NULL DEFAULT 'pending_payment'::text,
+  pdf_path text,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  gst_percent numeric NOT NULL DEFAULT 18.00,
+  line_items jsonb NOT NULL DEFAULT '[]'::jsonb,
+  payment_id uuid,
+  quality_id bigint,
+  CONSTRAINT estimates_pkey PRIMARY KEY (id),
+  CONSTRAINT estimates_ptype_id_fkey FOREIGN KEY (ptype_id) REFERENCES public.project_types(id),
+  CONSTRAINT estimates_engineer_id_fkey FOREIGN KEY (engineer_id) REFERENCES auth.users(id),
+  CONSTRAINT estimates_payment_id_fkey FOREIGN KEY (payment_id) REFERENCES public.payments(id),
+  CONSTRAINT estimates_quality_id_fkey FOREIGN KEY (quality_id) REFERENCES public.qualities(id)
+);
+CREATE TABLE public.payments (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  estimate_id uuid,
+  engineer_id uuid NOT NULL,
+  provider text NOT NULL DEFAULT 'razorpay'::text,
+  provider_order_id text,
+  provider_payment_id text,
+  amount numeric NOT NULL,
+  currency text NOT NULL DEFAULT 'INR'::text,
+  status text NOT NULL DEFAULT 'created'::text,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  estimate_payload jsonb,
+  pricing_snapshot jsonb,
+  provider_signature text,
+  paid_at timestamp with time zone,
+  CONSTRAINT payments_pkey PRIMARY KEY (id),
+  CONSTRAINT payments_estimate_id_fkey FOREIGN KEY (estimate_id) REFERENCES public.estimates(id),
+  CONSTRAINT payments_engineer_id_fkey FOREIGN KEY (engineer_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.profiles (
+  id uuid NOT NULL,
+  name text,
+  firm_name text,
+  qualification text,
+  address text,
+  phone text,
+  phone_verified boolean NOT NULL DEFAULT false,
+  letterhead_path text,
+  signseal_path text,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  free_estimates_used integer NOT NULL DEFAULT 0,
+  CONSTRAINT profiles_pkey PRIMARY KEY (id),
+  CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.project_type_charges (
+  project_type_code text NOT NULL,
+  contingencies_percent numeric NOT NULL DEFAULT 2.50,
+  electrification_percent numeric NOT NULL DEFAULT 2.50,
+  CONSTRAINT project_type_charges_pkey PRIMARY KEY (project_type_code),
+  CONSTRAINT project_type_charges_project_type_code_fkey FOREIGN KEY (project_type_code) REFERENCES public.project_types(code)
+);
+CREATE TABLE public.project_types (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  name text NOT NULL UNIQUE,
+  code text NOT NULL,
+  CONSTRAINT project_types_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.qty_rules_area_band (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  rule_code text NOT NULL,
+  area_min_sqft numeric NOT NULL,
+  area_max_sqft numeric NOT NULL,
+  value numeric NOT NULL,
+  active boolean NOT NULL DEFAULT true,
+  CONSTRAINT qty_rules_area_band_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.qualities (
+  id bigint NOT NULL DEFAULT nextval('qualities_id_seq'::regclass),
+  project_type_code text NOT NULL,
+  name text NOT NULL,
+  rate_per_sqft numeric NOT NULL,
+  CONSTRAINT qualities_pkey PRIMARY KEY (id),
+  CONSTRAINT qualities_project_type_code_fkey FOREIGN KEY (project_type_code) REFERENCES public.project_types(code)
+);

@@ -831,7 +831,7 @@ export async function buildEstimatePdfBuffer({
           key: "name",
           label: "DESCRIPTION",
           w: Math.round(aw * 0.43),
-          align: "left",
+          align: "justify",
         },
         {
           key: "unit",
