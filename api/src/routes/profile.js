@@ -88,11 +88,9 @@ export function makeProfileRouter({ db }) {
         const signsealFile = req.files?.signseal?.[0] || null;
 
         if (!letterheadFile && !signsealFile) {
-          return res
-            .status(400)
-            .json({
-              error: "No files received. Upload letterhead and/or signseal.",
-            });
+          return res.status(400).json({
+            error: "No files received. Upload letterhead and/or signseal.",
+          });
         }
 
         const updatePatch = {

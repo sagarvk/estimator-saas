@@ -156,12 +156,39 @@ const AppHeader: React.FC = () => {
             isApplicationMenuOpen ? "flex" : "hidden"
           } items-center justify-between w-full gap-4 px-5 py-4 lg:flex shadow-theme-md lg:justify-end lg:px-0 lg:shadow-none`}
         >
+          {/* Support Info */}
+<div className="hidden sm:flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-2 text-xl font-medium text-gray-800 dark:border-gray-800 dark:text-gray-200">
+  <svg
+    className="h-6 w-6 text-brand-500"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.518 4.554a1 1 0 01-.502 1.21l-2.257 1.128a11.042 11.042 0 005.516 5.516l1.128-2.257a1 1 0 011.21-.502l4.554 1.518a1 1 0 01.684.948V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+    />
+  </svg>
+
+  <span className="whitespace-nowrap">
+    Technical Support:
+  </span>
+
+  <a
+    href="tel:+919859121121"
+    className="font-semibold text-brand-600 hover:underline dark:text-brand-400"
+  >
+    +91&nbsp;9859 121 121
+  </a>
+</div>
+
+
+
+
           <div className="flex items-center gap-2 2xsm:gap-3">
-            {/* <!-- Dark Mode Toggler --> */}
             <ThemeToggleButton />
-            {/* <!-- Dark Mode Toggler --> */}
-            <NotificationDropdown />
-            {/* <!-- Notification Menu Area --> */}
           </div>
           {/* <!-- User Area --> */}
           <UserDropdown />

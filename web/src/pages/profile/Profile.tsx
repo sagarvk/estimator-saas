@@ -77,6 +77,17 @@ function FilePicker({
   );
 }
 
+function validatePng(file: File, label: string) {
+  const isPng = file.type === "image/png" || file.name.toLowerCase().endsWith(".png");
+  if (!isPng) return `${label} must be a PNG file.`;
+
+  const maxBytes = 2 * 1024 * 1024; // 2MB
+  if (file.size > maxBytes) return `${label} must be under 2MB.`;
+
+  return "";
+}
+
+
 export default function Profile() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
@@ -123,6 +134,57 @@ export default function Profile() {
     load().catch((e) => setErr(e.message || "Failed to load profile"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+
+  const saveAll = async () => {
+  try {
+    setLoading(true);
+    setErr("");
+    setOk("");
+
+    // 1) Save profile fields
+    await api("/api/profile", {
+      method: "PUT",
+      body: JSON.stringify(form),
+    });
+
+    if (files.letterhead) {
+    const msg = validatePng(files.letterhead, "Letterhead");
+    if (msg) return setErr(msg);
+    }
+    if (files.signseal) {
+      const msg = validatePng(files.signseal, "Sign + Seal");
+    if (msg) return setErr(msg);
+    }
+
+    // 2) Upload files (only if selected)
+  const hasFiles = !!files.letterhead || !!files.signseal;
+      if (hasFiles) {
+        const fd = new FormData();
+        if (files.letterhead) fd.append("letterhead", files.letterhead);
+        if (files.signseal) fd.append("signseal", files.signseal);
+
+        await api("/api/profile/upload", {
+          method: "POST",
+          body: fd,
+          isForm: true,
+        });
+
+        setFiles({ letterhead: null, signseal: null });
+      }
+
+      // 3) Reload once (to update status + uploaded flags)
+      await load();
+
+      setOk(hasFiles ? "Profile + files saved successfully." : "Profile saved successfully.");
+    } catch (e: any) {
+      setErr(e.message || "Save failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
 
   const save = async () => {
     try {
@@ -213,7 +275,7 @@ export default function Profile() {
             <Input
               value={form.firm_name}
               onChange={(e) => setForm({ ...form, firm_name: e.target.value })}
-              placeholder="Firm / Consultancy name"
+              placeholder="Firm / Consultancy Name"
             />
           </div>
 
@@ -222,7 +284,7 @@ export default function Profile() {
             <Input
               value={form.qualification}
               onChange={(e) => setForm({ ...form, qualification: e.target.value })}
-              placeholder="e.g. B.E. Civil, M.E. Structure"
+              placeholder="e.g. B.E. Civil, M.E. Structure, B. Arch."
             />
           </div>
 
@@ -238,14 +300,14 @@ export default function Profile() {
               rows={3}
               value={form.address}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
-              placeholder="Full address"
+              placeholder="Full Address"
             />
           </div>
         </div>
 
         <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-end">
-          <Button disabled={loading} onClick={save} className="w-full sm:w-auto">
-            {loading ? "Saving..." : "Save Profile"}
+          <Button disabled={loading} onClick={saveAll} className="w-full sm:w-auto">
+            {loading ? "Saving..." : files.letterhead || files.signseal ? "Save Profile + Upload" : "Save Profile"}
           </Button>
         </div>
       </div>
@@ -259,7 +321,7 @@ export default function Profile() {
         <div className="mt-4 grid gap-4">
           <FilePicker
             label="Letterhead (PNG)"
-            hint="Recommended: A4 width image, clean letterhead"
+            hint="PNG only (max 2MB). Recommended: 2480px wide (A4 @300DPI), height 250–450px. White/transparent background. Header band only (first page)."
             file={files.letterhead}
             onPick={(f: File | null) => setFiles((s) => ({ ...s, letterhead: f }))}
             onClear={() => setFiles((s) => ({ ...s, letterhead: null }))}
@@ -267,7 +329,7 @@ export default function Profile() {
 
           <FilePicker
             label="Sign + Seal (PNG)"
-            hint="Transparent background preferred"
+            hint="PNG only (max 2MB). Recommended: transparent background. Size: 600–1200px wide. Sign & seal only (prints on all pages)."
             file={files.signseal}
             onPick={(f: File | null) => setFiles((s) => ({ ...s, signseal: f }))}
             onClear={() => setFiles((s) => ({ ...s, signseal: null }))}

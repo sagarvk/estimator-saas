@@ -139,7 +139,7 @@ export default function Landing() {
                               </Link>
                               <Link
                                   to="/signup"
-                                  className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
+                                  className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/5"
                               >
                                   Sign up
                               </Link>
@@ -158,7 +158,7 @@ export default function Landing() {
                                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75" />
                                   </span>
                               </span>
-                              Fast Estimates • PDF Download • GST Included
+                              Fast & Accurate • With Updated SSR Rates • Letterhead, Sign & Seal Included
                           </div>
 
                           <h1 className="mt-4 text-3xl font-semibold text-black dark:text-white sm:text-4xl">
@@ -169,8 +169,7 @@ export default function Landing() {
                               EstimatorPro is designed for Civil Engineers and Architects who need clear, professional, and reliable estimate documents—without wasting time on repetitive calculations or manual formatting. 
                           </p>
                           <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-                            Whether you’re preparing estimates for bank loan approvals, project submissions, or client documentation, EstimatorPro helps you generate clean, structured PDF estimates that look authoritative and are ready to share instantly.
-                          </p>
+                            Powered by updated SSR rates, EstimatorPro ensures your estimates align with the latest Schedule of Rates, making them ideal for bank loans, approvals, and official submissions. The platform automatically handles quantities, rule-based items, and standard provisions, reducing errors while maintaining technical accuracy.Each estimate is generated as a clean, structured PDF with proper breakup, charges, and GST. With built-in letterhead, sign, and seal, your estimates are ready to share instantly</p>
                          
                           <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
                             From sign-up to submission in minutes—complete your profile, add your letterhead, signature, and seal, and generate professional estimates instantly.
