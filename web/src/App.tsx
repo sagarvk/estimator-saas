@@ -22,6 +22,11 @@ import PrivacyPolicy from "./pages/Legal/PrivacyPolicy";
 import ShippingPolicy from "./pages/Legal/ShippingPolicy";
 import RefundPolicy from "./pages/Legal/RefundPolicy";
 import ContactUs from "./pages/Legal/ContactUs";
+import ChangePassword from "./pages/Settings/ChangePassword";
+import ForgotPassword from "./pages/AuthPages/ForgotPassword";
+import ResetPassword from "./pages/AuthPages/ResetPassword";
+
+
 export default function App() {
   return (
     <Router>
@@ -41,6 +46,9 @@ export default function App() {
         {/* Auth pages */}
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/auth/reset" element={<ResetPassword />} />
+        <Route path="/settings/change-password" element={<ChangePassword />} />
 
         {/* Protected Dashboard Layout */}
         {/* ✅ Protected app under /app */}
@@ -56,6 +64,7 @@ export default function App() {
           <Route path="profile" element={<Profile />} />
           <Route path="estimate" element={<Estimate />} />
           <Route path="history" element={<History />} />
+          <Route path="settings/change-password" element={<ChangePassword />} />
 
 
           

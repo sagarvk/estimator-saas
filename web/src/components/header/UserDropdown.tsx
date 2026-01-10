@@ -13,6 +13,7 @@ export default function UserDropdown() {
   const [userName, setUserName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("/images/user/owner.jpg");
   const [firmName, setFirmName] = useState("");
+  const [canChangePassword, setCanChangePassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -33,7 +34,11 @@ export default function UserDropdown() {
       // Auth user
       const { data: authData } = await supabase.auth.getUser();
       const u = authData?.user;
+
       setUserEmail(u?.email || "");
+
+      const providers = u?.app_metadata?.providers || [];
+      setCanChangePassword(providers.includes("email"));
 
       // Profile
       const res = await api("/api/profile");
@@ -44,11 +49,13 @@ export default function UserDropdown() {
     } catch {
       setUserName("User");
       setFirmName("");
+      setCanChangePassword(false);
     } finally {
       setLoadingUser(false);
     }
   })();
 }, []);
+
 
 
   
@@ -158,6 +165,18 @@ export default function UserDropdown() {
               Edit profile
             </DropdownItem>
           </li>
+          {canChangePassword ? (
+          <li>
+            <DropdownItem
+              onItemClick={closeDropdown}
+              tag="a"
+              to="/app/settings/change-password"
+              className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white"
+            >
+              Change password
+            </DropdownItem>
+          </li>
+          ) : null}
         </ul>
 
         <button

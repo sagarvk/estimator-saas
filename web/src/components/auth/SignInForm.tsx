@@ -225,13 +225,9 @@ export default function SignInForm() {
                   </div>
 
                   <Link
-                    to="/reset-password"
+                    to="/forgot-password"
                     className="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      alert("Reset password page can be added next.");
-                    }}
-                  >
+                   >
                     Forgot password?
                   </Link>
                 </div>
