@@ -21,7 +21,7 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
   "https://estimatorpro-saas.vercel.app",
-  // add custom domain later if any: "https://estimatorpro.co.in"
+  "https://estimatorpro.in",
 ];
 
 app.use(
