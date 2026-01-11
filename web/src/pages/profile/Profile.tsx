@@ -109,6 +109,15 @@ export default function Profile() {
   const [err, setErr] = useState("");
   const [ok, setOk] = useState("");
   const [isComplete, setIsComplete] = useState(false);
+  const [busy, setBusy] = useState(false); // blocks UI navigation
+  const [step, setStep] = useState<"idle" | "saving" | "uploading" | "finalizing">("idle");
+  const progress = step === "saving" ? 35 : step === "uploading" ? 75 : step === "finalizing" ? 95 : 0;
+
+  const wasCompleteRef = useRef(false);
+
+  useEffect(() => {
+    wasCompleteRef.current = isComplete;
+  }, [isComplete]);
 
   const load = async () => {
     const res = await api("/api/profile");
@@ -124,7 +133,7 @@ export default function Profile() {
       phone: p.phone || "",
     });
 
-    // If complete, auto-send to dashboard
+    //If complete, auto-send to dashboard
     //if (res.is_complete) {
     //  navigate("/", { replace: true });
     //}
@@ -135,54 +144,93 @@ export default function Profile() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+  if (!busy) return;
+
+  const handler = (e: BeforeUnloadEvent) => {
+    e.preventDefault();
+    e.returnValue = "";
+  };
+
+  window.addEventListener("beforeunload", handler);
+  return () => window.removeEventListener("beforeunload", handler);
+}, [busy]);
+
+
 
   const saveAll = async () => {
   try {
-    setLoading(true);
     setErr("");
     setOk("");
 
-    // 1) Save profile fields
+    // ✅ Validate files BEFORE starting busy mode
+    if (files.letterhead) {
+      const msg = validatePng(files.letterhead, "Letterhead");
+      if (msg) throw new Error(msg);
+    }
+    if (files.signseal) {
+      const msg = validatePng(files.signseal, "Sign + Seal");
+      if (msg) throw new Error(msg);
+    }
+
+    setBusy(true);
+    setLoading(true);
+
+    setStep("saving");
     await api("/api/profile", {
       method: "PUT",
       body: JSON.stringify(form),
     });
 
-    if (files.letterhead) {
-    const msg = validatePng(files.letterhead, "Letterhead");
-    if (msg) return setErr(msg);
+    const hasFiles = !!files.letterhead || !!files.signseal;
+    if (hasFiles) {
+      setStep("uploading");
+
+      const fd = new FormData();
+      if (files.letterhead) fd.append("letterhead", files.letterhead);
+      if (files.signseal) fd.append("signseal", files.signseal);
+
+      await api("/api/profile/upload", {
+        method: "POST",
+        body: fd,
+        isForm: true,
+      });
+
+      setFiles({ letterhead: null, signseal: null });
     }
-    if (files.signseal) {
-      const msg = validatePng(files.signseal, "Sign + Seal");
-    if (msg) return setErr(msg);
+
+    setStep("finalizing");
+    // ✅ reload profile once and check completeness
+    const res = await api("/api/profile");
+    const p = res.profile || {};
+    setIsComplete(!!res.is_complete);
+    setProfile(p);
+
+    setForm({
+      name: p.name || "",
+      firm_name: p.firm_name || "",
+      qualification: p.qualification || "",
+      address: p.address || "",
+      phone: p.phone || "",
+    });
+
+    setOk(hasFiles ? "Profile + files saved successfully." : "Profile saved successfully.");
+
+    // ✅ Redirect ONLY after save, and only if now complete
+    if (!wasCompleteRef.current && res.is_complete) {
+      navigate("/", { replace: true });
     }
+  
+  
+  } catch (e: any) {
+    setErr(e.message || "Save failed");
+  } finally {
+    setStep("idle");
+    setBusy(false);
+    setLoading(false);
+  }
+};
 
-    // 2) Upload files (only if selected)
-  const hasFiles = !!files.letterhead || !!files.signseal;
-      if (hasFiles) {
-        const fd = new FormData();
-        if (files.letterhead) fd.append("letterhead", files.letterhead);
-        if (files.signseal) fd.append("signseal", files.signseal);
-
-        await api("/api/profile/upload", {
-          method: "POST",
-          body: fd,
-          isForm: true,
-        });
-
-        setFiles({ letterhead: null, signseal: null });
-      }
-
-      // 3) Reload once (to update status + uploaded flags)
-      await load();
-
-      setOk(hasFiles ? "Profile + files saved successfully." : "Profile saved successfully.");
-    } catch (e: any) {
-      setErr(e.message || "Save failed");
-    } finally {
-      setLoading(false);
-    }
-  };
 
 
 
@@ -241,6 +289,41 @@ export default function Profile() {
 
   return (
     <div className="grid gap-6">
+      {busy ? (
+  <div className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/40 p-4">
+    <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-theme-lg dark:bg-gray-900">
+      <div className="text-base font-semibold text-gray-900 dark:text-white">
+        {step === "saving"
+          ? "Saving profile..."
+          : step === "uploading"
+          ? "Uploading files..."
+          : "Finishing up..."}
+      </div>
+
+      <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        Please don’t close or navigate away.
+      </div>
+
+      <div className="mt-4 h-2 w-full rounded-full bg-gray-200 dark:bg-white/10">
+        <div
+          className="h-2 rounded-full bg-brand-500 transition-all duration-300"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+
+      <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+        {step === "saving"
+          ? "Step 1/3"
+          : step === "uploading"
+          ? "Step 2/3"
+          : "Step 3/3"}
+      </div>
+    </div>
+  </div>
+) : null}
+
+
+
       {err ? (
         <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-200">
           {err}
