@@ -46,6 +46,31 @@ function toCaps(v) {
   return (v ?? "").toString().toUpperCase();
 }
 
+function isPositiveNumber(v) {
+  if (v === "" || v == null) return false;
+  const n = Number(v);
+  return Number.isFinite(n) && n > 0;
+}
+
+function isNonNegativeNumber(v) {
+  if (v === "" || v == null) return true; // allow empty -> null
+  const n = Number(v);
+  return Number.isFinite(n) && n >= 0;
+}
+
+function isPositiveInt(v) {
+  if (v === "" || v == null) return false;
+  const n = Number(v);
+  return Number.isInteger(n) && n > 0;
+}
+
+function isValidISODate(d) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(String(d || ""));
+}
+
+
+
+
 export default function Estimate() {
   const [loading, setLoading] = useState(false);
   const [loadingMasters, setLoadingMasters] = useState(true);
@@ -72,6 +97,12 @@ export default function Estimate() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [preview, setPreview] = useState(null);
   const [quota, setQuota] = useState(null);
+
+  // settings (per-estimate, not stored in DB)
+  const [dateMode, setDateMode] = useState("auto"); // auto | manual
+  const [manualDate, setManualDate] = useState(""); // YYYY-MM-DD
+  const [showPlotDetails, setShowPlotDetails] = useState(true);
+  const [showFloors, setShowFloors] = useState(true);
 
   const selectedQuality = useMemo(
     () => qualities.find((q) => String(q.id) === String(qualityId)),
@@ -161,6 +192,20 @@ export default function Estimate() {
     })();
   }, []);
 
+  useEffect(() => {
+  if (!showPlotDetails) {
+    setPlotL("");
+    setPlotW("");
+  }
+}, [showPlotDetails]);
+
+useEffect(() => {
+  if (!showFloors) {
+    setFloors("");
+  }
+}, [showFloors]);
+
+
   const onGenerate = async () => {
     setErr("");
 
@@ -169,6 +214,22 @@ export default function Estimate() {
     if (!builtup || Number(builtup) <= 0) return setErr("Built-up area must be > 0.");
     if (!projectTypeCode) return setErr("Select project type.");
     if (!qualityId) return setErr("Select construction quality.");
+
+    if (dateMode === "manual") {
+    if (!manualDate || !isValidISODate(manualDate)) return setErr("Please select a valid manual date.");
+    }
+
+    if (!isPositiveNumber(builtup)) return setErr("Built-up area must be a number > 0.");
+
+    if (showPlotDetails) {
+      if (plotL && !isPositiveNumber(plotL)) return setErr("Plot Length must be a number > 0.");
+      if (plotW && !isPositiveNumber(plotW)) return setErr("Plot Width must be a number > 0.");
+    }
+
+    if (showFloors) {
+      if (!isPositiveInt(floors)) return setErr("No. of Floors must be a whole number (1,2,3...).");
+    }
+
 
     try {
       setLoading(true);
@@ -209,13 +270,20 @@ export default function Estimate() {
       const estimate_payload = {
         client_name: toCaps(clientName.trim()),
         project_address: toCaps(projectAddress.trim()),
-        plot_length_ft: plotL ? Number(plotL) : null,
-        plot_width_ft: plotW ? Number(plotW) : null,
-        floors: floors ? Number(floors) : null,
+        plot_length_ft: showPlotDetails && plotL ? Number(plotL) : null,
+        plot_width_ft: showPlotDetails && plotW ? Number(plotW) : null,
+        floors: showFloors ? Number(floors) : null,
         builtup_area_sqft: Number(builtup),
         project_type_code: projectTypeCode,
-        quality_id: Number(qualityId), // ✅ keep consistent
+        quality_id: Number(qualityId),
+        settings: {
+          date_mode: dateMode,
+          estimate_date_manual: dateMode === "manual" ? manualDate : null,
+          show_plot_details: !!showPlotDetails,
+          show_floors: !!showFloors,
+        },
       };
+
 
       const created = await api("/api/payments/create-order", {
         method: "POST",
@@ -345,24 +413,58 @@ export default function Estimate() {
           />
         </div>
 
-        <div>
-          <Label>Plot Length (ft.)</Label>
-          <Input value={plotL} onChange={(e) => setPlotL(e.target.value)} placeholder="e.g. 40" />
-        </div>
+           <div>
+  <Label>Plot Length (ft.)</Label>
+  <Input
+    value={plotL}
+    onChange={(e) => setPlotL(e.target.value)}
+    placeholder="e.g. 40"
+    inputMode="decimal"
+    disabled={!showPlotDetails}
+  />
+  {!showPlotDetails ? (
+    <div className="mt-1 text-xs text-gray-400">
+      Plot details disabled in settings
+    </div>
+  ) : null}
+</div>
 
-        <div>
-          <Label>Plot Width (ft.)</Label>
-          <Input value={plotW} onChange={(e) => setPlotW(e.target.value)} placeholder="e.g. 30" />
-        </div>
+
+       <div>
+  <Label>Plot Width (ft.)</Label>
+  <Input
+    value={plotW}
+    onChange={(e) => setPlotW(e.target.value)}
+    placeholder="e.g. 30"
+    inputMode="decimal"
+    disabled={!showPlotDetails}
+  />
+</div>
+
+
+
+        
 
         <div>
           <Label>No. of Floors</Label>
-          <Input value={floors} onChange={(e) => setFloors(e.target.value)} placeholder="e.g. 2" />
+          <Input
+            value={floors}
+            onChange={(e) => setFloors(e.target.value)}
+            placeholder="e.g. 2"
+            inputMode="numeric"
+            disabled={!showFloors}
+          />
+          {!showFloors ? (
+            <div className="mt-1 text-xs text-gray-400">
+              Floors disabled in settings
+            </div>
+          ) : null}
         </div>
+
 
         <div>
           <Label>Total Built-up Area (sq.ft.) *</Label>
-          <Input value={builtup} onChange={(e) => setBuiltup(e.target.value)} placeholder="e.g. 1200" />
+          <Input value={builtup} onChange={(e) => setBuiltup(e.target.value)} placeholder="e.g. 1200" inputMode="decimal"/>
         </div>
 
         <div>
@@ -392,6 +494,63 @@ export default function Estimate() {
             ))}
           </Select>
         </div>
+
+
+
+        {/* Settings */}
+        <div className="mt-4 rounded-lg border border-stroke p-4 dark:border-strokedark">
+          <div className="mb-3 text-sm font-semibold text-black dark:text-white">
+            Settings
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <Label>Estimate Date</Label>
+              <Select value={dateMode} onChange={(e) => setDateMode(e.target.value)}>
+                <option value="auto">Auto (Today)</option>
+                <option value="manual">Manual (Backdated)</option>
+              </Select>
+
+              {dateMode === "manual" ? (
+                <div className="mt-2">
+                  <Label>Manual Date *</Label>
+                  <Input
+                    type="date"
+                    value={manualDate}
+                    onChange={(e) => setManualDate(e.target.value)}
+                  />
+                  <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    This date will be printed on the PDF.
+                  </div>
+                </div>
+              ) : null}
+            </div>
+
+            <div>
+              <Label>PDF Visibility</Label>
+              <div className="mt-2 space-y-2 text-sm">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={showPlotDetails}
+                    onChange={(e) => setShowPlotDetails(e.target.checked)}
+                  />
+                  Show Plot Area Details
+                </label>
+
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={showFloors}
+                    onChange={(e) => setShowFloors(e.target.checked)}
+                  />
+                  Show Floors
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">

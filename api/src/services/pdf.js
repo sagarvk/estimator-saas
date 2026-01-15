@@ -591,6 +591,8 @@ export async function buildEstimatePdfBuffer({
   gstAmount,
   total,
   gstPercent = 18,
+  showPlotDetails = true,
+  showFloors = true,
 }) {
   return await new Promise((resolve, reject) => {
     try {
@@ -725,33 +727,35 @@ export async function buildEstimatePdfBuffer({
       });
 
       // ✅ PLOT DIMENSION BLOCK (like screenshot)
-      y = drawPlotDimensionBlock(
-        doc,
-        x0,
-        y,
-        tableW,
-        blockH,
-        plotLengthFt,
-        plotWidthFt
-      );
+      if (showPlotDetails) {
+        y = drawPlotDimensionBlock(
+          doc,
+          x0,
+          y,
+          tableW,
+          blockH,
+          plotLengthFt,
+          plotWidthFt
+        );
+      }
 
       // ✅ BUILTUP AREA BLOCK (like screenshot)
       y = drawBuiltupAreaBlock(doc, x0, y, tableW, blockH, builtupArea);
 
       // NO. OF FLOORS
-      y = drawTwoColRow(
-        doc,
-        x0,
-        y,
-        labelW,
-        valueW,
-        rowH,
-        "NO. OF FLOORS",
-        floorsText,
-        {
-          fontSize: 12,
-        }
-      );
+      if (showFloors) {
+        y = drawTwoColRow(
+          doc,
+          x0,
+          y,
+          labelW,
+          valueW,
+          rowH,
+          "NO. OF FLOORS",
+          floorsText,
+          { fontSize: 12 }
+        );
+      }
 
       // SUBTOTAL
       y = drawTwoColRow(

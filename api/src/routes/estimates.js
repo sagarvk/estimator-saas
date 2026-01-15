@@ -20,6 +20,58 @@ export function makeEstimateRouter({ db, gstRate = 0.18 }) {
         quality_id,
       } = p;
 
+      const s = p.settings || {};
+      const dateMode = String(s.date_mode || "auto").toLowerCase();
+      const manual = s.estimate_date_manual || null;
+
+      if (dateMode === "manual") {
+        if (!manual)
+          return res.status(400).json({ error: "Manual date is required." });
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(String(manual))) {
+          return res
+            .status(400)
+            .json({ error: "Invalid manual date format (YYYY-MM-DD)." });
+        }
+      }
+
+      // numeric validation
+      const builtupNum = Number(builtup_area_sqft);
+      if (!Number.isFinite(builtupNum) || builtupNum <= 0) {
+        return res
+          .status(400)
+          .json({ error: "Built-up area must be a number > 0." });
+      }
+
+      const showPlotDetails = s.show_plot_details !== false;
+      const showFloors = s.show_floors !== false;
+
+      if (showPlotDetails) {
+        if (plot_length_ft != null) {
+          const pl = Number(plot_length_ft);
+          if (!Number.isFinite(pl) || pl <= 0)
+            return res
+              .status(400)
+              .json({ error: "Plot Length must be a number > 0." });
+        }
+        if (plot_width_ft != null) {
+          const pw = Number(plot_width_ft);
+          if (!Number.isFinite(pw) || pw <= 0)
+            return res
+              .status(400)
+              .json({ error: "Plot Width must be a number > 0." });
+        }
+      }
+
+      if (showFloors) {
+        if (floors != null) {
+          const fl = Number(floors);
+          if (!Number.isInteger(fl) || fl <= 0)
+            return res.status(400).json({
+              error: "No. of Floors must be a whole number (1,2,3...).",
+            });
+        }
+      }
+
       if (
         !client_name ||
         !project_address ||

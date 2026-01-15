@@ -47,6 +47,54 @@ async function finalizeEstimateAndGetSignedUrl({
     quality_id,
   } = p;
 
+  // -------------------
+  // Settings (no DB storage)
+  // -------------------
+  const s = p.settings || {};
+  const dateMode = String(s.date_mode || "auto").toLowerCase();
+  const manual = s.estimate_date_manual || null;
+
+  const showPlotDetails = s.show_plot_details !== false; // default true
+  const showFloors = s.show_floors !== false; // default true
+
+  let estDate = new Date().toISOString().slice(0, 10);
+  if (dateMode === "manual") {
+    if (!manual) throw new Error("Manual date is required.");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(manual))) {
+      throw new Error("Invalid manual date format (YYYY-MM-DD).");
+    }
+    estDate = String(manual);
+  }
+
+  // -------------------
+  // Numeric validations (server-side)
+  // -------------------
+  const builtupNum = Number(builtup_area_sqft);
+  if (!Number.isFinite(builtupNum) || builtupNum <= 0) {
+    throw new Error("Built-up area must be a number > 0.");
+  }
+
+  if (showPlotDetails) {
+    if (plot_length_ft != null) {
+      const pl = Number(plot_length_ft);
+      if (!Number.isFinite(pl) || pl <= 0)
+        throw new Error("Plot Length must be a number > 0.");
+    }
+    if (plot_width_ft != null) {
+      const pw = Number(plot_width_ft);
+      if (!Number.isFinite(pw) || pw <= 0)
+        throw new Error("Plot Width must be a number > 0.");
+    }
+  }
+
+  if (showFloors) {
+    if (floors != null) {
+      const fl = Number(floors);
+      if (!Number.isInteger(fl) || fl <= 0)
+        throw new Error("No. of Floors must be a whole number (1,2,3...).");
+    }
+  }
+
   // Load quality + project type names
   const { data: q, error: qerr } = await db
     .from("qualities")
@@ -108,7 +156,7 @@ async function finalizeEstimateAndGetSignedUrl({
   if (refErr) throw new Error(refErr.message);
   const refNo = refData;
 
-  const estDate = new Date().toISOString().slice(0, 10);
+  //const estDate = new Date().toISOString().slice(0, 10);
 
   // Load engineer profile images
   const { data: profile } = await db
@@ -150,6 +198,8 @@ async function finalizeEstimateAndGetSignedUrl({
     subtotal: built.subtotalExclGst,
     gstAmount: built.gstAmount,
     total: built.totalInclGst,
+    showPlotDetails,
+    showFloors,
   });
 
   // Upload PDF to storage
